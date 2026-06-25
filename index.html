@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WELL DESIGN | 工業設計與雷射工藝</title>
+    
+    <!-- 設定分頁標籤 LOGO (Favicon) -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/sdVr2Qwk/8e63d409-183f-4c20-af61-99f6192b65e6.jpg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --burgundy: #800020;
+            --burgundy-glow: rgba(128, 0, 32, 0.4);
+            --dark-bg: #030303;
+            --surface: #0a0a0a;
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Grok 風格卡片 */
+        .grok-card {
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grok-card:hover {
+            border-color: var(--burgundy);
+            box-shadow: 0 0 30px var(--burgundy-glow);
+            transform: translateY(-2px);
+        }
+
+        /* GIF/背景媒體容器 */
+        .media-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .media-background img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.3) saturate(0.8) contrast(1.1);
+        }
+
+        .media-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, var(--dark-bg) 95%);
+            z-index: 0;
+        }
+
+        .scanlines { position: relative; }
+        .scanlines::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .burgundy-accent { color: var(--burgundy); }
+        .burgundy-bg { background-color: var(--burgundy); }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .reveal.active {
+            opacity: 1; transform: translateY(0);
+        }
+
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            background: rgba(3, 3, 3, 0.9);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--burgundy); }
+
+        .glow-text { text-shadow: 0 0 20px var(--burgundy-glow); }
+
+        .grid-bg {
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        @keyframes logo-pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(128, 0, 32, 0)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 25px var(--burgundy-glow)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(128, 0, 32, 0)); }
+        }
+        .logo-animate { animation: logo-pulse 4s infinite cubic-bezier(0.4, 0, 0.2, 1); will-change: transform, filter; }
+
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--burgundy); } }
+
+        .typewriter {
+            overflow: hidden; border-right: 2px solid var(--burgundy);
+            white-space: nowrap; margin: 0 auto; letter-spacing: .4em;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        .live-dot {
+            width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%;
+            display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #22c55e;
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .loading-bar { width: 0%; height: 2px; background-color: var(--burgundy); transition: width 0.5s ease; }
+
+        .qr-gradient-border {
+            padding: 2px;
+            background: linear-gradient(135deg, var(--burgundy), #440011);
+            border-radius: 4px;
+        }
+
+        .line-button {
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        .line-button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body class="grid-bg">
+
+    <!-- 頂部導覽 -->
+    <nav class="fixed top-0 w-full z-[100] nav-blur px-8 py-4 flex justify-between items-center transition-all duration-300">
+        <div class="flex items-center space-x-8">
+            <img src="https://i.ibb.co/CyH6R22/965-x-983.png" alt="WELL DESIGN LOGO" class="h-20 md:h-24 w-auto logo-animate">
+            <div class="h-10 w-[1px] bg-white/20"></div>
+            <div class="flex flex-col">
+                <span class="mono font-bold tracking-[0.4em] text-sm">WELL DESIGN</span>
+                <span class="mono text-[8px] text-[#800020] tracking-[0.2em] opacity-70 uppercase">Design & Laser Art</span>
+            </div>
+        </div>
+        <div class="hidden lg:flex items-center space-x-12 mono text-[10px] tracking-widest uppercase opacity-70">
+            <a href="#about" class="hover:text-[#800020] hover:opacity-100 transition-all">About</a>
+            <a href="#services" class="hover:text-[#800020] hover:opacity-100 transition-all">Services</a>
+            <a href="#archives" class="hover:text-[#800020] hover:opacity-100 transition-all">Archives</a>
+            <a href="#contact" class="px-6 py-3 bg-white text-black font-bold hover:bg-[#800020] hover:text-white transition-all">Request_Access</a>
+        </div>
+        <button class="lg:hidden text-white opacity-50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </nav>
+
+    <!-- 主視覺 Hero -->
+    <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-6 pt-40 overflow-hidden">
+        
+        <div class="media-background">
+            <img src="https://i.ibb.co/fYwmpz1h/1766077203677.gif" alt="WELL DESIGN DYNAMIC BACKGROUND">
+            <div class="media-overlay"></div>
+        </div>
+        
+        <div class="relative z-10 reveal active">
+            <div class="inline-block mb-12">
+                <p class="mono burgundy-accent text-sm md:text-lg font-bold uppercase tracking-[0.6em] typewriter">Unlock the future</p>
+                <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-[#800020] to-transparent mt-3 opacity-60"></div>
+            </div>
+
+            <h1 class="text-7xl md:text-[10rem] font-black tracking-tighter mb-10 leading-none">
+                WELL<br><span class="burgundy-accent glow-text italic">DESIGN.</span>
+            </h1>
+            
+            <p class="max-w-2xl mx-auto text-gray-300 text-sm md:text-lg font-light tracking-wide leading-relaxed mb-16">
+                威爾設計專注於專業產品設計、精密工程繪圖以及極致的雷射雕刻代工服務。我們將數位設計與物理材質完美融合，為您的品牌解鎖未來的視覺張力。
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <a href="#services" class="burgundy-bg text-white px-12 py-5 font-bold text-xs tracking-widest uppercase hover:scale-105 transition-transform shadow-[0_0_20px_rgba(128,0,32,0.3)]">瀏覽服務項目</a>
+                <a href="#contact" class="text-white px-12 py-5 border border-white/10 hover:border-white/40 transition-all text-[11px] mono">INITIALIZE_HANDSHAKE</a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 flex flex-col items-center opacity-30 z-10">
+            <span class="mono text-[10px] mb-6 tracking-[0.6em]">SCROLL_TO_DESCEND</span>
+            <div class="w-[1px] h-16 bg-gradient-to-b from-white to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- 技術指標 Section -->
+    <section id="about" class="py-40 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
+            <div class="lg:col-span-7 reveal">
+                <h2 class="text-4xl md:text-5xl font-bold mb-10 tracking-tighter uppercase leading-tight">高解析雷射工藝<br>與設計美學<span class="burgundy-accent">.</span></h2>
+                <div class="space-y-8 text-gray-400 font-light leading-loose text-base md:text-lg">
+                    <p>
+                        在 WELL DESIGN，我們致力於挑戰精密度的極限。運用高解析度雷射技術（高達 1000 DPI），我們能於各類材質——從金屬、原木、皮革到壓克力——勾勒出肉眼難以察覺的細膩紋理。
+                    </p>
+                    <p>
+                        自 2013 年創立以來，我們的流程始終堅持「數位設計引領實體工藝」。透過極細（0.05mm）的雷射路徑，確保每一件作品在實現創意的同時，保有工業等級的精確度與材質原始的高級質感。
+                    </p>
+                    <p class="mono text-xs burgundy-accent tracking-[0.4em] font-bold uppercase">>> Mission: Unlock_the_future</p>
+                </div>
+            </div>
+            <div class="lg:col-span-5 reveal">
+                <div class="grok-card p-10 mono">
+                    <div class="flex justify-between items-center mb-12 border-b border-white/5 pb-6">
+                        <span class="text-[11px] text-gray-500 uppercase tracking-widest">Processing_Stats</span>
+                        <div class="flex items-center">
+                            <span class="live-dot"></span>
+                            <span class="mono text-[10px] text-green-500">SYSTEM_READY</span>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="flex justify-between items-end">
+                            <span class="text-xs text-gray-500">Processing_Precision</span>
+                            <span class="text-2xl burgundy-accent font-bold">±0.05mm</span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-xs text-gray-500">Max_Resolution</span>
+                            <span class="text-2xl burgundy-accent font-bold">1000 DPI</span>
+                        </div>
+                        <!-- 每日進站瀏覽人數 -->
+                        <div class="flex justify-between items-end">
+                            <span class="text-xs text-gray-500">Daily_Traffic</span>
+                            <span id="visitor-count" class="text-2xl burgundy-accent font-bold">50</span>
+                        </div>
+                        <div class="pt-8">
+                            <div class="w-full bg-white/5 h-[1px]"></div>
+                            <p class="text-[10px] text-gray-600 mt-6 leading-relaxed">
+                                > [INFO] 高功率半導體雷射就緒<br>
+                                > [INFO] 多材質資料庫已同步
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服務模組 -->
+    <section id="services" class="py-40 px-6 bg-[#050505] scanlines">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-24 reveal">
+                <h2 class="text-5xl font-black tracking-tighter mb-6">CORE_SERVICES</h2>
+                <div class="h-[3px] w-24 burgundy-bg"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 01: 產品設計 -->
+                <div class="grok-card p-8 reveal flex flex-col group">
+                    <div class="mb-8 opacity-30 group-hover:opacity-100 transition-opacity svg-float">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" opacity="0.2"/>
+                            <path d="M12 2L12 17.77" stroke="#800020" stroke-width="1"/>
+                            <circle cx="12" cy="12" r="9" stroke-dasharray="2 2"/>
+                            <rect x="3" y="3" width="18" height="18" opacity="0.1"/>
+                        </svg>
+                    </div>
+                    <div class="text-[11px] mono text-gray-600 mb-3 tracking-widest uppercase">ID: WD-DE-001</div>
+                    <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter">產品設計與研發</h3>
+                    <p class="text-gray-500 text-xs font-light leading-loose mb-8 flex-grow">
+                        從概念發想到工業造型，提供具備市場競爭力的設計方案，平衡美感與實用性。
+                    </p>
+                    <div class="h-[1px] w-full bg-white/5 mb-6"></div>
+                    <span class="mono text-[9px] text-gray-700 tracking-widest uppercase">Tag: Product_Design</span>
+                </div>
+
+                <!-- 02: 工程繪圖 -->
+                <div class="grok-card p-8 reveal flex flex-col group" style="transition-delay: 0.1s;">
+                    <div class="mb-8 opacity-30 group-hover:opacity-100 transition-opacity svg-float">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3h18v18H3z" opacity="0.2"/>
+                            <path d="M3 3l18 18M3 21L21 3" stroke="#800020" stroke-width="0.5"/>
+                            <path d="M12 3v18M3 12h18" stroke-dasharray="1 3"/>
+                            <circle cx="12" cy="12" r="5" stroke="#800020" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <div class="text-[11px] mono text-gray-600 mb-3 tracking-widest uppercase">ID: WD-DR-002</div>
+                    <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter">專業工程繪圖</h3>
+                    <p class="text-gray-500 text-xs font-light leading-loose mb-8 flex-grow">
+                        提供精確的平面與立體工程製圖服務，協助專案在生產階段實現零誤差對接。
+                    </p>
+                    <div class="h-[1px] w-full bg-white/5 mb-6"></div>
+                    <span class="mono text-[9px] text-gray-700 tracking-widest uppercase">Tag: Drafting_Services</span>
+                </div>
+
+                <!-- 03: 雷射雕刻 -->
+                <div class="grok-card p-8 reveal flex flex-col group" style="transition-delay: 0.2s;">
+                    <div class="mb-8 opacity-30 group-hover:opacity-100 transition-opacity svg-float">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="2" fill="#800020"/>
+                            <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#800020" stroke-width="1"/>
+                            <path d="M12 12L22 2" stroke-dasharray="2 2" opacity="0.5"/>
+                            <path d="M5 5l14 14" opacity="0.1"/>
+                            <rect x="4" y="4" width="16" height="16" stroke-dasharray="4 4"/>
+                        </svg>
+                    </div>
+                    <div class="text-[11px] mono text-gray-600 mb-3 tracking-widest uppercase">ID: WD-LA-003</div>
+                    <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter">雷射雕刻與代工</h3>
+                    <p class="text-gray-500 text-xs font-light leading-loose mb-8 flex-grow">
+                        適用於金屬、木材、壓克力等多元材質。無論圖案雕刻還是序列號標示，皆能精準呈現。
+                    </p>
+                    <div class="h-[1px] w-full bg-white/5 mb-6"></div>
+                    <span class="mono text-[9px] text-gray-700 tracking-widest uppercase">Tag: Laser_Processing</span>
+                </div>
+
+                <!-- 04: 平面美工設計 -->
+                <div class="grok-card p-8 reveal flex flex-col group" style="transition-delay: 0.3s;">
+                    <div class="mb-8 opacity-30 group-hover:opacity-100 transition-opacity svg-float">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z" opacity="0.2"/>
+                            <path d="M18 13l-1.5-7.5L4 2l3.5 12.5L13 18l5-5z" stroke="#800020" stroke-width="1"/>
+                            <path d="M2 22l5-5" stroke-dasharray="2 2"/>
+                            <circle cx="12" cy="12" r="3" stroke-dasharray="1 1" opacity="0.5"/>
+                            <path d="M4 2L2 4" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <div class="text-[11px] mono text-gray-600 mb-3 tracking-widest uppercase">ID: WD-GD-004</div>
+                    <h3 class="text-xl font-bold mb-4 uppercase tracking-tighter">平面美工設計</h3>
+                    <p class="text-gray-500 text-xs font-light leading-loose mb-8 flex-grow">
+                        專注於品牌視覺、商業美編與包裝設計，結合美學與市場洞察，為產品打造辨識度視覺。
+                    </p>
+                    <div class="h-[1px] w-full bg-white/5 mb-6"></div>
+                    <span class="mono text-[9px] text-gray-700 tracking-widest uppercase">Tag: Graphic_Design</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 聯繫表單 -->
+    <section id="contact" class="py-48 px-6 relative overflow-hidden">
+        <!-- 成功覆蓋層 -->
+        <div id="success-overlay" class="absolute inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-700">
+            <div class="text-center p-12 grok-card max-w-md">
+                <div class="mb-6 burgundy-accent">
+                    <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 tracking-widest mono uppercase">Transmission_Complete</h3>
+                <p class="text-gray-500 text-sm font-light mb-8 leading-loose">
+                    您的專案數據已成功加密並傳輸至威爾設計核心伺服器。我們的技術團隊將於分析完成後立即與您聯繫。
+                </p>
+                <button onclick="closeSuccessOverlay()" class="px-8 py-3 border border-white/10 hover:border-[#800020] transition-colors mono text-[10px]">ACKNOWLEDGE</button>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-20 reveal">
+                <h2 class="text-4xl font-bold mb-6 tracking-tight">啟動合作需求</h2>
+                <p class="text-gray-500 text-base font-light">如果您有設計或雷射雕刻的需求，威爾設計隨時為您服務。</p>
+            </div>
+            
+            <!-- 聯繫布局：表單 + LINE QR -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                
+                <!-- 表單區塊 -->
+                <div class="lg:col-span-8 reveal">
+                    <form id="wd-contact-form" action="https://formspree.io/f/xdanonqo" method="POST" class="space-y-12 mono relative">
+                        <div class="relative group">
+                            <label class="text-[10px] text-gray-600 uppercase tracking-[0.4em] block mb-4">Client_Identity</label>
+                            <input id="form-name" name="name" type="text" placeholder="您的名稱" required class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#800020] transition-colors text-base font-light">
+                        </div>
+                        <div class="relative group">
+                            <label class="text-[10px] text-gray-600 uppercase tracking-[0.4em] block mb-4">Contact_Endpoint</label>
+                            <input id="form-email" name="email" type="email" placeholder="example@domain.com" required class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#800020] transition-colors text-base font-light">
+                        </div>
+                        <div class="relative group">
+                            <label class="text-[10px] text-gray-600 uppercase tracking-[0.4em] block mb-4">Request_Payload</label>
+                            <textarea id="form-message" name="message" rows="4" placeholder="請描述您的設計或代工需求..." required class="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#800020] transition-colors text-base font-light resize-none"></textarea>
+                        </div>
+                        
+                        <div id="form-status" class="h-4 text-[9px] text-gray-600 uppercase tracking-widest mono opacity-0 transition-opacity duration-300">
+                            Initializing_Encryption_Protocol...
+                        </div>
+
+                        <div class="relative">
+                            <div id="loading-bar-container" class="absolute top-0 left-0 w-full h-[2px] bg-white/5 opacity-0">
+                                <div id="submit-loading-bar" class="loading-bar"></div>
+                            </div>
+                            <button id="transmit-btn" type="submit" class="w-full burgundy-bg text-white py-6 font-bold tracking-[0.6em] text-[12px] uppercase hover:tracking-[0.9em] transition-all shadow-[0_0_20px_rgba(128,0,32,0.4)]">
+                                Transmit_Message()
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- LINE QR 區塊 (包含點擊加入按鈕) -->
+                <div class="lg:col-span-4 reveal" style="transition-delay: 0.2s;">
+                    <div class="grok-card p-10 flex flex-col items-center justify-center text-center">
+                        <span class="mono text-[10px] text-gray-500 mb-8 uppercase tracking-[0.3em]">Line_Official_Account</span>
+                        
+                        <div class="qr-gradient-border mb-8 shadow-[0_0_20px_rgba(128,0,32,0.2)]">
+                            <div class="bg-white p-2 rounded-sm">
+                                <img src="https://i.ibb.co/0y75VzVX/L-gainfriends-2dbarcodes-GW.png" alt="LINE QR Code" class="w-48 h-48">
+                            </div>
+                        </div>
+
+                        <!-- 加入好友連結按鈕 -->
+                        <div class="mb-8">
+                            <a href="https://lin.ee/fjQg8Kf" target="_blank" class="line-button inline-block">
+                                <img src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png" alt="加入好友" height="36" border="0">
+                            </a>
+                        </div>
+
+                        <p class="text-sm text-gray-400 font-light mb-4 leading-relaxed">
+                            掃描上方 QR Code 或<br>點擊按鈕直接開啟對話
+                        </p>
+
+                        <!-- 新增的直接聯絡方式 -->
+                        <div class="w-full text-left bg-white/5 p-4 mt-2 mb-6 border border-white/10 relative overflow-hidden group hover:border-[#800020] transition-colors">
+                            <div class="absolute left-0 top-0 w-1 h-full bg-[#800020] opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex items-center mb-3 pl-2">
+                                <svg class="w-4 h-4 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                <a href="mailto:a338651@gmail.com" class="text-xs md:text-sm text-gray-300 hover:text-[#800020] transition-colors font-light tracking-wider">a338651@gmail.com</a>
+                            </div>
+                            <div class="flex items-center pl-2">
+                                <svg class="w-4 h-4 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                <a href="tel:0988328785" class="text-xs md:text-sm text-gray-300 hover:text-[#800020] transition-colors font-light tracking-wider">0988-328-785</a>
+                            </div>
+                        </div>
+                        
+                        <div class="w-8 h-[1px] bg-white/20 mb-4"></div>
+                        <span class="mono text-[9px] text-gray-600 uppercase tracking-widest">Protocol: Direct_Contact</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="py-24 px-8 border-t border-white/5 bg-[#020202]">
+        <div class="max-w-7xl mx-auto flex flex-col items-center">
+            <img src="https://i.ibb.co/CyH6R22/965-x-983.png" alt="WELL DESIGN" class="h-24 md:h-32 w-auto mb-10 opacity-70 hover:opacity-100 transition-all logo-animate">
+            <p class="mono burgundy-accent text-sm font-bold tracking-[1em] uppercase mb-16 glow-text">Unlock the future</p>
+            
+            <div class="flex flex-wrap justify-center gap-16 mono text-[11px] text-gray-600 tracking-[0.3em] mb-12 uppercase">
+                <a href="#" class="hover:text-white transition-colors">LinkedIn</a>
+                <a href="https://www.facebook.com/YOUR_FB_PAGE" target="_blank" class="hover:text-[#800020] transition-colors">Facebook</a>
+                <a href="#" class="hover:text-white transition-colors">Instagram</a>
+                <a href="#" class="hover:text-white transition-colors">Technical_Archives</a>
+            </div>
+
+            <!-- 新增聯絡資訊至頁尾 -->
+            <div class="flex flex-col items-center space-y-4 mb-16 mono text-gray-400 font-light text-xs tracking-widest">
+                <a href="mailto:a338651@gmail.com" class="hover:text-[#800020] transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    a338651@gmail.com
+                </a>
+                <a href="tel:0988328785" class="hover:text-[#800020] transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    0988-328-785
+                </a>
+            </div>
+            
+            <p class="mono text-[10px] text-gray-700 tracking-[0.4em] text-center max-w-lg leading-relaxed">
+                &copy; 2013 WELL DESIGN CO. ALL RIGHTS RESERVED. <br>
+                CRAFTED FOR QUALITY AND PRECISION.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function updateVisitorCount() {
+            const countElement = document.getElementById('visitor-count');
+            let currentCount = parseInt(localStorage.getItem('well_design_visitors')) || 50;
+            currentCount += 1;
+            localStorage.setItem('well_design_visitors', currentCount);
+            countElement.textContent = currentCount;
+
+            setInterval(() => {
+                const add = Math.floor(Math.random() * 2);
+                if (add > 0) {
+                    currentCount += add;
+                    localStorage.setItem('well_design_visitors', currentCount);
+                    countElement.textContent = currentCount;
+                }
+            }, 10000);
+        }
+
+        const contactForm = document.getElementById('wd-contact-form');
+        const transmitBtn = document.getElementById('transmit-btn');
+        const formStatus = document.getElementById('form-status');
+        const loadingBarContainer = document.getElementById('loading-bar-container');
+        const loadingBar = document.getElementById('submit-loading-bar');
+        const successOverlay = document.getElementById('success-overlay');
+
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            transmitBtn.disabled = true;
+            transmitBtn.style.opacity = '0.5';
+            transmitBtn.innerText = 'Transmitting...';
+            formStatus.classList.remove('opacity-0');
+            loadingBarContainer.classList.remove('opacity-0');
+
+            const statusMessages = ['Initializing_Encryption_Protocol...', 'Packing_Data_Payload...', 'Establishing_Secure_Connection...', 'Pushing_to_Server...'];
+            
+            for (let i = 0; i < statusMessages.length - 1; i++) {
+                formStatus.innerText = statusMessages[i];
+                loadingBar.style.width = `${(i + 1) * 25}%`;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            const formData = new FormData(contactForm);
+            
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    formStatus.innerText = 'Transmission_Success_Verified';
+                    loadingBar.style.width = '100%';
+                    setTimeout(showSuccessOverlay, 800);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.errors ? data.errors[0].message : 'Transmission_Failed');
+                }
+            } catch (error) {
+                formStatus.innerText = `Error: ${error.message}`;
+                formStatus.classList.add('text-red-500');
+                transmitBtn.disabled = false;
+                transmitBtn.style.opacity = '1';
+                transmitBtn.innerText = 'Retry_Transmission()';
+            }
+        });
+
+        function showSuccessOverlay() {
+            successOverlay.classList.remove('pointer-events-none');
+            successOverlay.classList.add('opacity-100');
+            contactForm.reset();
+        }
+
+        function closeSuccessOverlay() {
+            successOverlay.classList.add('pointer-events-none');
+            successOverlay.classList.remove('opacity-100');
+            transmitBtn.disabled = false;
+            transmitBtn.style.opacity = '1';
+            transmitBtn.innerText = 'Transmit_Message()';
+            formStatus.classList.add('opacity-0');
+            formStatus.classList.remove('text-red-500');
+            loadingBarContainer.classList.add('opacity-0');
+            loadingBar.style.width = '0%';
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('py-3'); nav.classList.remove('py-4');
+            } else {
+                nav.classList.add('py-4'); nav.classList.remove('py-3');
+            }
+        });
+
+        window.onload = () => {
+            updateVisitorCount();
+        };
+    </script>
+</body>
+</html>
